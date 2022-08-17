@@ -1,38 +1,41 @@
-<?php
-    require('db.php');
-    session_start();
-    if (isset($_POST['username'])) {
-        $username = stripslashes($_REQUEST['username']);   
-        $username = mysqli_real_escape_string($con, $username);
-        $password = stripslashes($_REQUEST['password']);
-        $password = mysqli_real_escape_string($con, $password);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>title</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
 
-        $query    = "SELECT * FROM `users` WHERE username='$username'
-                     AND password='" . md5($password) . "'";
-        $result = mysqli_query($con, $query) or die("error");
-        $rows = mysqli_num_rows($result);
-        if ($rows == 1) {
-            $_SESSION['username'] = $username;
-    
-            header("Location: dashboard.php");
-        } else {
-            echo "<div class='form'>
-                  <h3>Incorrect Username/password.</h3><br/>
-                  <p class='link'>Click here to <a href='login.php'>Login</a> again.</p>
-                  </div>";
-        }
-    } else {
+<?php  
+  
+  include_once "user.php";
+
+  if(isset($_SESSION['id'])) {
+      header("Location:home.php");
+  }
+
+  $userobj = new User();
+  
+  $success = "";
+  $error = "";
+
+  if (isset($_POST['submit'])) {
+      $newdata['email'] = $_POST['email'];
+      $newdata['password'] = $_POST['password'];
+      
+      if ($userobj->login($newdata)) {
+          if (!isset($_SESSION['id'])) {
+              header("Location:index.php");
+          } else {  
+              header("Location:home.php");
+          }
+      }else{
+          $error = "Incorrect Email or Password";
+      }
+    }
 ?>
 
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Login</title>
-    <link rel="stylesheet" href="../css/styles.css"/>
-</head>
-<body>
+<body class="hold-transition login-page">
 <div>
     <div class="login-div ">
     <div class="bsf-icon">
@@ -42,19 +45,15 @@
 <div class="login">
  <h1 class="login-title">Login</h1>
     <form class="login-form" method="post" name="login">
-    <h3 class="account-holder">Login Into Your account</h3>   
-    <label>Username or Email</label>
-        <input type="text" class="login-input-form" name="username" autofocus="true"/> <br>
+        <h3 class="account-holder">Login Into Your account</h3>   
+        <label>Email</label>
+        <input type="text" class="login-input-form" name="email" autofocus="true"/> <br>
         <label>Password</label><br>
         <input type="password" class="login-input-form" name="password"/>
         <input type="submit" value="Login" name="submit" class="login-btn"/>
-        <p class="link">Don't have an account? <a href="registration.php">Registration Now</a></p>
+        <p class="link">Don't have an account? <a href="index.php">Registration Now</a></p>
     </form>
 </div>
 </div>
-</body>
+  </body>
 </html>
-
-<?php
-    }
-?>
